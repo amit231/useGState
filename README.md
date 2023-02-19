@@ -12,17 +12,42 @@ npm install --save usegstate
 
 ## Usage
 
+### Create Global State
+
 ```tsx
-import React, { Component } from 'react'
+import { gState } from 'usegstate'
 
-import MyComponent from 'usegstate'
-import 'usegstate/dist/index.css'
+const myGlobalState = gState('hello-world!')
 
-class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
+```
+
+### Use Global State
+
+```tsx
+import useGState from 'usegstate'
+
+const GenderGetter = () => {
+  const [gState,setGState] = useGState(myGlobalState)
+  return (
+    <div>{gState}</div>
+  )
 }
+```
+
+### Don't forget to wrap your app inside GStateProvider
+
+
+```tsx
+import {GStateProvider} from 'usegstate'
+
+const Wrapper = () => {
+  return (
+    <GStateProvider>
+      <YourWonderfullApp />
+    </GStateProvider>
+  )
+}
+
 ```
 
 ## License
