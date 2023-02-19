@@ -1,89 +1,13 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useState
-} from 'react'
+import * as React from 'react';
+import useGState from 'usegstate'
 
-
-const StoreContext = React.createContext<
-  Partial<{
-    get: (a: string) => any
-    set: (a: string, v: object) => void
-    subscribe: (fn: () => void) => void
-    unsubscribe: (fn: () => void) => void
-  }>
->({})
-
-
-const store = {
-  current:{}
-};
-const GStateContextProvider = StoreContext.Provider
-interface IgState {
-  key: string
-  value: any
-}
-
-const useGState = (gState: IgState) => {
-  const { get, set, subscribe, unsubscribe } = useContext(StoreContext)
-  const [state, setState] = useState(gState.value)
-
-  const setter = useCallback((val) => {
-    set?.(gState.key, val)
-  }, [])
-  useEffect(() => {
-    const subscriber = () => {
-      const updatedState = get?.(gState.key)
-      setState(()=>updatedState)
-    }
-    subscribe?.(subscriber)
-    return () => {
-      unsubscribe?.(subscriber)
-    }
-  }, [])
-
-  return [state, setter]
-}
-
-let gStateCnt = 0
-const gState = (value: any): IgState => {
-  const key = `gState#${++gStateCnt}`
-  store.current[key] = value;
-  return { key, value }
-}
+import {gState,GStateProvider} from 'usegstate'
 
 const nameGState = gState('G')
 const ageGState = gState(12)
 const isMaleGState = gState(false)
-const premetiveTypes = ['number','string','bigInt','boolean']
-export const GStateProvider = ({ children }: { children: JSX.Element }) => {
-  const get = React.useCallback((a: string) => {
-    return store.current[a]
-  }, [])
-  const set = React.useCallback((a: string, val: any) => {
-    if(premetiveTypes.includes(typeof val)){
-      store.current[a] = val;
-    } else{
-      store.current[a] = { ...store.current[a], ...val }
-    }
-    subs.current.forEach(sub=>sub());
-  }, [])
-  const subs = React.useRef(new Set<() => void>())
-  const subscribe = React.useCallback((fn: () => void) => {
-    subs.current.add(fn)
-  }, [])
-  const unsubscribe = React.useCallback((fn: () => void) => {
-    subs.current.delete(fn)
-  }, [])
-  return (
-    <GStateContextProvider value={{ get, set, subscribe, unsubscribe }}>
-      {children}
-    </GStateContextProvider>
-  )
-}
 
-const App = () => {
+const Test = () => {
   return (
     <GStateProvider>
       <Client />
@@ -91,45 +15,51 @@ const App = () => {
   )
 }
 
-export default App
+export {Test}
 const Client = () => {
   return (
+    <div style={{display:'grid',placeItems:'center',height:'100vh',background:'grey'}}>
+
    <div style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
     <Name />
     <Age />
     <Gender />
    </div>
+    </div>
   )
 }
 const Name = () => {
   const [getter, setter] = useGState(nameGState)
   return (
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'10px',border:'1px solid black',borderRadius:'4px',margin:'40vh auto'}}>
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'10px',border:'1px solid black',borderRadius:'4px',margin:'auto'}}>
       <input
+      style={{color:'black'}}
         value={getter}
         onChange={(e) => {
           setter(e.target.value)
         }}
         autoFocus={true}
       ></input>
-      <div>Your name is "{getter}"</div>
-      <Age />
+     <NameGetter />
+     <AgeGetter />
     </div>
   )
 }
 const Age = () => {
   const [getter, setter] = useGState(ageGState)
   return (
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'10px',border:'1px solid black',borderRadius:'4px',margin:'40vh auto'}}>
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'10px',border:'1px solid black',borderRadius:'4px',margin:'auto'}}>
       <input
+      style={{color:'black'}}
         value={getter}
         type="number"
         onChange={(e) => {
           setter(e.target.value)
         }}
       ></input>
-      <div>Your age is "{getter}"</div>
-
+      <AgeGetter />
+      <GenderGetter />
+        {/* <Gender /> */}
     </div>
   )
 }
@@ -138,19 +68,39 @@ const Age = () => {
 const Gender = () => {
   const [getter, setter] = useGState(isMaleGState)
   return (
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'10px',border:'1px solid black',borderRadius:'4px',margin:'40vh auto'}}>
-      <input
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'10px',border:'1px solid black',borderRadius:'4px',margin:'auto'}}>
+      Are you a mail?<input
+      style={{color:'black'}}
         value={getter}
         type="radio"
         onChange={(e) => {
           setter(e.target.value)
         }}
       ></input>
-      <div>You are a "{getter?'male':'female'}"</div>
-
-
+      <GenderGetter />
+      <NameGetter />
+        {/* <Name/> */}
     </div>
   )
+}
+
+const GenderGetter = () => {
+  const [getter] = useGState(isMaleGState)
+  return (
+    <div>You are a "{getter?'male':'female'}"</div>
+  )
+}
+const AgeGetter = () => {
+  const [getter] = useGState(ageGState)
+  return (
+    <div>Your age is "{getter}"</div>
+    )
+}
+const NameGetter = () => {
+  const [getter] = useGState(nameGState)
+  return (
+    <div>Your name is "{getter}"</div>
+    )
 }
 
 

@@ -1,5 +1,11 @@
-interface Props {
-    text: string;
+interface IgState {
+    key: string;
+    value: any;
 }
-export declare const ExampleComponent: ({ text }: Props) => JSX.Element;
-export {};
+declare const useGState: (gState: IgState) => any[];
+declare const gState: (value: any) => IgState;
+export default useGState;
+declare const GStateProvider: ({ children }: {
+    children: JSX.Element;
+}) => JSX.Element;
+export { GStateProvider, gState };
