@@ -8,19 +8,20 @@ const StoreContext = React.createContext<
 >({})
 
 const GStateContextProvider = StoreContext.Provider
+interface IgState {key:string,value:any};
 
-const useStore = () => {
+const useStore = (gState:IgState) => {
   const { get, set } = useContext(StoreContext)
   const [v, setv] = useState(1)
   const setter = useCallback((v) => {
-    set('ip', { val: v })
+    set(gState.key, { val: v })
     setv((v) => v + 1)
   }, [])
   const getter = useMemo(() => {
-    return get('ip')?.val
+    return get(gState.key)?.val
   }, [v])
   useEffect(()=>{
-    set('ip', { val: 'a'})
+    set(gState.key, { val: gState.value})
   }
   ,[])
 
@@ -29,6 +30,14 @@ const useStore = () => {
   //  const {get,set}  = useContext(StoreContext);
 }
 
+let stateCount = 0;
+const gState = (value:any):IgState=>{
+  const key = `gState#${++stateCount}`;
+  return {key,value};
+}
+
+const ipState = gState('');
+
 export const GStateProvider = ({ children }: { children: JSX.Element }) => {
   const store = React.useRef({})
   const get = React.useCallback((a: string) => {
@@ -36,6 +45,7 @@ export const GStateProvider = ({ children }: { children: JSX.Element }) => {
   }, [])
   const set = React.useCallback((a: string, val: any) => {
     store.current[a] = { ...store.current[a], ...val }
+    console.log(`store: `,store);
   }, [])
   return (
     <GStateContextProvider value={{ get, set }}>
@@ -43,6 +53,11 @@ export const GStateProvider = ({ children }: { children: JSX.Element }) => {
     </GStateContextProvider>
   )
 }
+
+
+
+
+
 
 const App = () => {
   return (
@@ -54,8 +69,7 @@ const App = () => {
 
 export default App
 const Client = () => {
-  const [getter, setter] = useStore()
-  console.log(`getter: `, getter)
+  const [getter, setter] = useStore(ipState)
   return (
     <div>
       {' '}
