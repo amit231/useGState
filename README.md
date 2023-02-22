@@ -1,6 +1,6 @@
 # usegstate
 
-> react library for creating global states in most easy way
+> The simplest way to create Global States.
 
 [![NPM](https://img.shields.io/npm/v/usegstate.svg)](https://www.npmjs.com/package/usegstate) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
